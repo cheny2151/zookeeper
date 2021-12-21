@@ -400,7 +400,7 @@ public class FastLeaderElection implements Election {
                                 /**
                                  * 如果当前服务器已经选举出leader，
                                  * 但是接收到的信息节点状态为LOOKING，
-                                 * 则将当前服务选举的leader发送回去
+                                 * 则将选举出来的leader发送回去
                                  */
                                 Vote current = self.getCurrentVote();
                                 if (ackstate == QuorumPeer.ServerState.LOOKING) {
