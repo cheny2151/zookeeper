@@ -380,16 +380,15 @@ public class FastLeaderElection implements Election {
                             LOG.info("Notification: my state:{}; n.sid:{}, n.state:{}, n.leader:{}, n.round:0x{}, " + "n.peerEpoch:0x{}, n.zxid:0x{}, message format version:0x{}, n.config version:0x{}", self.getPeerState(), n.sid, n.state, n.leader, Long.toHexString(n.electionEpoch), Long.toHexString(n.peerEpoch), Long.toHexString(n.zxid), Long.toHexString(n.version), (n.qv != null ? (Long.toHexString(n.qv.getVersion())) : "0"));
 
                             /*
-                             * If this server is looking, then send proposed leader
+                             * 如果当前节点也处于LOOKING状态，则发送建议的领导者
                              */
-
                             if (self.getPeerState() == QuorumPeer.ServerState.LOOKING) {
+                                // 推到FastLeaderElection的信息接收队列里;lookForLeader方法会进行消费
                                 recvqueue.offer(n);
 
                                 /*
-                                 * Send a notification back if the peer that sent this
-                                 * message is also looking and its logical clock is
-                                 * lagging behind.
+                                 * 如果远程节点的状态为LOOKING，并且逻辑时钟<当前节点，
+                                 * 则向远程节点发送当前节点的选举信息
                                  */
                                 if ((ackstate == QuorumPeer.ServerState.LOOKING) && (n.electionEpoch < logicalclock.get())) {
                                     Vote v = getVote();
