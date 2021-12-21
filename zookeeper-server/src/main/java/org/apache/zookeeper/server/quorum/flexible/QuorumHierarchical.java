@@ -66,8 +66,11 @@ public class QuorumHierarchical implements QuorumVerifier {
 
     private static final Logger LOG = LoggerFactory.getLogger(QuorumHierarchical.class);
 
+    // 存储节点权重
     private HashMap<Long, Long> serverWeight = new HashMap<Long, Long>();
+    // 存储节点所属的分组
     private HashMap<Long, Long> serverGroup = new HashMap<Long, Long>();
+    // 存储分组权重总和
     private HashMap<Long, Long> groupWeight = new HashMap<Long, Long>();
 
     private int numGroups = 0;
@@ -323,7 +326,9 @@ public class QuorumHierarchical implements QuorumVerifier {
     }
 
     /**
-     * Verifies if a given set is a quorum.
+     * 验证选票集合是否满足过半权重
+     *
+     * @param set 相同选票的集合
      */
     public boolean containsQuorum(Set<Long> set) {
         HashMap<Long, Long> expansion = new HashMap<Long, Long>();
@@ -341,6 +346,7 @@ public class QuorumHierarchical implements QuorumVerifier {
             if (gid == null) {
                 continue;
             }
+            // 累计节点选票权重
             if (!expansion.containsKey(gid)) {
                 expansion.put(gid, serverWeight.get(sid));
             } else {
@@ -356,12 +362,14 @@ public class QuorumHierarchical implements QuorumVerifier {
         for (Entry<Long, Long> entry : expansion.entrySet()) {
             Long gid = entry.getKey();
             LOG.debug("Group info: {}, {}, {}", entry.getValue(), gid, groupWeight.get(gid));
+            // 超过分组权重的一半则通过该组选票
             if (entry.getValue() > (groupWeight.get(gid) / 2)) {
                 majGroupCounter++;
             }
         }
 
         LOG.debug("Majority group counter: {}, {}", majGroupCounter, numGroups);
+        // 超过分组数量的一半则通过选票
         if ((majGroupCounter > (numGroups / 2))) {
             LOG.debug("Positive set size: {}", set.size());
             return true;

@@ -1281,7 +1281,9 @@ public class QuorumCnxManager {
                         }
 
                         if (b != null) {
+                            // 每次发送都记录在lastMessageSent集合
                             lastMessageSent.put(sid, b);
+                            // 发送数据
                             send(b);
                         }
                     } catch (InterruptedException e) {
